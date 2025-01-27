@@ -7,3 +7,8 @@ scikit-learn
 geopandas
 shapely
 folium
+statsmodels
+nltk
+tensorflow
+category-encoders
+xgboost
