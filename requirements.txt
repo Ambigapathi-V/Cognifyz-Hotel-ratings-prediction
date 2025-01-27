@@ -12,3 +12,10 @@ nltk
 tensorflow
 category-encoders
 xgboost
+flask
+ensure
+python-box
+pyyaml
+dataclasses
+
+
