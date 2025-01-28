@@ -1,0 +1,3 @@
+Numeric Columns:  ['longitude', 'latitude', 'has_table_booking', 'price_range', 'floor', 'cuisine_count', 'geo_cluster', 'city_restaurant_density', 'average_city_rating', 'mall_popularity', 'floor_rank', 'cuisine_popularity']
+Categorical Columns: ['city', 'currency', 'is_delivering_now', 'rating_color', 'rating_text', 'Rating Category', 'cuisine1', 'cuisine2', 'cuisine3', 'cuisine4', 'price_level']
+Preprocessor saved successfully!

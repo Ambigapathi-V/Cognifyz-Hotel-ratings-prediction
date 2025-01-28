@@ -2,7 +2,7 @@ from src.Hotel_Ratings_prediction.logging import logging
 from src.Hotel_Ratings_prediction.Exception import Exception
 from src.Hotel_Ratings_prediction.constants import *
 from src.Hotel_Ratings_prediction.utils.common import read_yaml, create_directories
-from src.Hotel_Ratings_prediction.entity.config_entity import DataIngestionConfig
+from src.Hotel_Ratings_prediction.entity.config_entity import (DataIngestionConfig,DataPreparationConfig)
 from pathlib import Path
 
 class ConfigurationManager:
@@ -36,3 +36,23 @@ class ConfigurationManager:
         )
         
         return data_ingestion_config
+
+    def get_data_preparation_config(self) -> DataPreparationConfig:
+        config = self.config.data_preparation
+        
+        # Ensure that the paths are converted to Path objects and directories are created
+        create_directories([config.root_dir])
+        
+        data_preparation_config = DataPreparationConfig(
+            root_dir=config.root_dir,
+            input_path=Path(config.input_path),
+            output_path=Path(config.output_path),
+            preprocessor=Path(config.preprocessor),
+            target_column = config.target_column,
+            X_train_transformed_df = Path(config.X_train_transformed_df),
+            Y_train_transformed_df = Path(config.Y_train_transformed_df),
+            X_test_transformed_df = Path(config.X_test_transformed_df),
+            Y_test_transformed_df = Path(config.Y_test_transformed_df)
+        )
+        
+        return data_preparation_config

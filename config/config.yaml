@@ -4,3 +4,15 @@ data_ingestion:
   root_dir: artifacts/data_ingestion
   input_path: data/Hotel_Dataset.csv
   output_path: artifacts/data_ingestion/Hotel_Dataset.csv
+
+data_preparation:
+  root_dir: artifacts/data_preparation
+  input_path: artifacts/data_ingestion/Hotel_Dataset.csv
+  output_path: artifacts/data_preparation/Hotel_Dataset.csv
+  preprocessor: artifacts/data_preparation/preprocessor.joblib
+  target_column: aggregate_rating
+  X_train_transformed_df: artifacts/data_preparation/X_train_transformed_df.csv
+  Y_train_transformed_df: artifacts/data_preparation/Y_train.csv
+  X_test_transformed_df: artifacts/data_preparation/X_test_transformed_df.csv
+  Y_test_transformed_df: artifacts/data_preparation/Y_test.csv
+ 
