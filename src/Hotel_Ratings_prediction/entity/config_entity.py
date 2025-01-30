@@ -19,6 +19,15 @@ class DataPreparationConfig:
     X_train_transformed_df: Path  # Ensure the naming matches the YAML file
     Y_train_transformed_df: Path  # Update to match YAML naming
     X_test_transformed_df: Path   # Ensure naming matches YAML
-    Y_test_transformed_df: Path               # Update to match YAML naming
+    Y_test_transformed_df: Path   # Update to match YAML naming
+
+@dataclass
+class ModelTrainerConfig:
+    root_dir: Path
+    X_train_transformed_df: Path
+    Y_train_transformed_df: Path
+    X_test_transformed_df: Path
+    Y_test_transformed_df: Path
+    model: Path
 
     

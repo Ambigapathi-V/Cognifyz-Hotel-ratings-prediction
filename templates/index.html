@@ -1,249 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aggregate Rating Predictor</title>
-  <style>
-    /* General Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Arial', sans-serif;
-    }
-
-    /* Body Styling */
-    body {
-      background-color: #f7f9fc;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    /* Container */
-    .container {
-      background-color: #fff;
-      width: 90%;
-      max-width: 1000px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .header h1 {
-      font-size: 24px;
-      color: #0077ff;
-    }
-
-    .header p {
-      font-size: 16px;
-      color: #555;
-    }
-
-    /* Form Container */
-    .form-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .input-group label {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .input-group input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .input-group input:focus {
-      outline: none;
-      border-color: #0077ff;
-      box-shadow: 0 0 4px rgba(0, 119, 255, 0.4);
-    }
-
-    /* Button */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      background-color: #0077ff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .btn:hover {
-      background-color: #005bbb;
-    }
-
-    /* Result Container */
-    .result-container {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .result-container h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .result-container p {
-      font-size: 20px;
-      color: #0077ff;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Data Visualization</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>Aggregate Rating Predictor</h1>
-      <p>Predict restaurant ratings based on key features</p>
+    <header>
+        <div class="container">
+            <h1>Restaurant Data Visualization</h1>
+            <nav>
+                <ul>
+                    <li><a href="#numeric">Numeric Data</a></li>
+                    <li><a href="#categorical">Categorical Data</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <div class="form-container">
-      <form id="rating-form">
-        <!-- Group 1: Basic Info -->
-        <div class="input-group">
-          <label for="price">Price Level (1-5):</label>
-          <input type="number" id="price" name="price" min="1" max="5" required>
+    <section id="numeric" class="section">
+        <div class="container">
+            <h2>Numeric Data Overview</h2>
+            <div id="numeric-stats">
+                <!-- Numeric statistics will be injected here -->
+            </div>
+            <div id="correlation-heatmap">
+                <!-- Correlation heatmap will be displayed here -->
+            </div>
         </div>
-        <div class="input-group">
-          <label for="location">Location Quality (1-5):</label>
-          <input type="number" id="location" name="location" min="1" max="5" required>
-        </div>
-        <div class="input-group">
-          <label for="service">Service Quality (1-5):</label>
-          <input type="number" id="service" name="service" min="1" max="5" required>
-        </div>
+    </section>
 
-        <!-- Group 2: Coordinates and Features -->
-        <div class="input-group">
-          <label for="longitude">Longitude:</label>
-          <input type="number" id="longitude" name="longitude" step="any" required>
+    <section id="categorical" class="section">
+        <div class="container">
+            <h2>Categorical Data Overview</h2>
+            <div id="city-distribution">
+                <!-- Categorical data charts will be injected here -->
+            </div>
         </div>
-        <div class="input-group">
-          <label for="latitude">Latitude:</label>
-          <input type="number" id="latitude" name="latitude" step="any" required>
-        </div>
-        <div class="input-group">
-          <label for="has_table_booking">Has Table Booking (0/1):</label>
-          <input type="number" id="has_table_booking" name="has_table_booking" min="0" max="1" required>
-        </div>
+    </section>
 
-        <!-- Group 3: Additional Info -->
-        <div class="input-group">
-          <label for="price_range">Price Range:</label>
-          <input type="number" id="price_range" name="price_range" min="1" max="5" required>
-        </div>
-        <div class="input-group">
-          <label for="floor">Floor:</label>
-          <input type="number" id="floor" name="floor" required>
-        </div>
-        <div class="input-group">
-          <label for="cuisine_count">Cuisine Count:</label>
-          <input type="number" id="cuisine_count" name="cuisine_count" required>
-        </div>
+    <!-- Prediction Form -->
+    <section id="prediction" class="section">
+        <div class="container">
+            <h2>Predict Restaurant Rating</h2>
+            <form method="POST">
+                <label for="restaurant_id">Restaurant ID:</label>
+                <input type="number" id="restaurant_id" name="restaurant_id" required><br><br>
 
-        <!-- Group 4: Additional Attributes -->
-        <div class="input-group">
-          <label for="city_restaurant_density">City Restaurant Density:</label>
-          <input type="number" id="city_restaurant_density" name="city_restaurant_density" required>
-        </div>
-        <div class="input-group">
-          <label for="average_city_rating">Average City Rating:</label>
-          <input type="number" id="average_city_rating" name="average_city_rating" required>
-        </div>
-        <div class="input-group">
-          <label for="mall_popularity">Mall Popularity:</label>
-          <input type="number" id="mall_popularity" name="mall_popularity" required>
-        </div>
+                <label for="country_code">Country Code:</label>
+                <input type="number" id="country_code" name="country_code" required><br><br>
 
-        <!-- Group 5: City and Delivery Info -->
-        <div class="input-group">
-          <label for="city">City:</label>
-          <input type="text" id="city" name="city" required>
-        </div>
-        <div class="input-group">
-          <label for="currency">Currency:</label>
-          <input type="text" id="currency" name="currency" required>
-        </div>
-        <div class="input-group">
-          <label for="is_delivering_now">Is Delivering Now (0/1):</label>
-          <input type="number" id="is_delivering_now" name="is_delivering_now" min="0" max="1" required>
-        </div>
+                <label for="longitude">Longitude:</label>
+                <input type="number" step="any" id="longitude" name="longitude" required><br><br>
 
-        <!-- Group 6: Rating and Cuisine -->
-        <div class="input-group">
-          <label for="rating_color">Rating Color:</label>
-          <input type="text" id="rating_color" name="rating_color" required>
-        </div>
-        <div class="input-group">
-          <label for="rating_text">Rating Text:</label>
-          <input type="text" id="rating_text" name="rating_text" required>
-        </div>
-        <div class="input-group">
-          <label for="rating_category">Rating Category:</label>
-          <input type="text" id="rating_category" name="rating_category" required>
-        </div>
-        <div class="input-group">
-          <label for="cuisine1">Cuisine 1:</label>
-          <input type="text" id="cuisine1" name="cuisine1" required>
-        </div>
-        <div class="input-group">
-          <label for="cuisine2">Cuisine 2:</label>
-          <input type="text" id="cuisine2" name="cuisine2" required>
-        </div>
-        <div class="input-group">
-          <label for="cuisine3">Cuisine 3:</label>
-          <input type="text" id="cuisine3" name="cuisine3" required>
-        </div>
-        <div class="input-group">
-          <label for="cuisine4">Cuisine 4:</label>
-          <input type="text" id="cuisine4" name="cuisine4" required>
-        </div>
-        <div class="input-group">
-          <label for="price_level">Price Level:</label>
-          <input type="number" id="price_level" name="price_level" min="1" max="5" required>
-        </div>
+                <label for="latitude">Latitude:</label>
+                <input type="number" step="any" id="latitude" name="latitude" required><br><br>
 
-        <button type="submit" class="btn">Predict Rating</button>
-      </form>
-    </div>
+                <label for="average_cost_for_two">Average Cost for Two:</label>
+                <input type="number" step="any" id="average_cost_for_two" name="average_cost_for_two" required><br><br>
 
-    <div class="result-container" id="result">
-      <h3>Predicted Aggregate Rating:</h3>
-      <p id="prediction">---</p>
-    </div>
-  </div>
+                <label for="price_range">Price Range:</label>
+                <input type="number" id="price_range" name="price_range" required><br><br>
 
-  <script>
-    document.getElementById('rating-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      // Your prediction logic here
-    });
-  </script>
+                <label for="votes">Votes:</label>
+                <input type="number" id="votes" name="votes" required><br><br>
+
+                <label for="floor">Floor:</label>
+                <input type="number" id="floor" name="floor" required><br><br>
+
+                <label for="geo_cluster">Geo Cluster:</label>
+                <input type="number" id="geo_cluster" name="geo_cluster" required><br><br>
+
+                <label for="city_restaurant_density">City Restaurant Density:</label>
+                <input type="number" step="any" id="city_restaurant_density" name="city_restaurant_density" required><br><br>
+
+                <label for="average_city_rating">Average City Rating:</label>
+                <input type="number" step="any" id="average_city_rating" name="average_city_rating" required><br><br>
+
+                <label for="mall_popularity">Mall Popularity:</label>
+                <input type="number" step="any" id="mall_popularity" name="mall_popularity" required><br><br>
+
+                <label for="cuisine_popularity">Cuisine Popularity:</label>
+                <input type="number" step="any" id="cuisine_popularity" name="cuisine_popularity" required><br><br>
+
+                <label for="floor_rank">Floor Rank:</label>
+                <input type="number" id="floor_rank" name="floor_rank" required><br><br>
+
+                <button type="submit">Predict Rating</button>
+            </form>
+
+            {% if prediction is not none %}
+            <h3>Predicted Rating: {{ prediction }}</h3>
+            {% endif %}
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Made with ❤️ by Your Name</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ from src.Hotel_Ratings_prediction.logging import logging
 from src.Hotel_Ratings_prediction.Exception import Exception
 from src.Hotel_Ratings_prediction.pipeline.data_ingestion_pipeline import DataIngestionTrainingPipeline
 from src.Hotel_Ratings_prediction.pipeline.data_preparation_pipeline import DataPreparationTrainingPipeline
+from src.Hotel_Ratings_prediction.pipeline.model_trainer_pipeline import ModelTrainingPipeline
 import sys
 
 STAGE_NAME = "Data Ingestion Stage"
@@ -23,6 +24,19 @@ try:
         pipeline = DataPreparationTrainingPipeline()
         logging.info(f">>>>>>>>>>>Starting {STAGE_NAME}<<<<<<<<<<<<<")
         pipeline.initiate_preparation_ingestion()
+        logging.info(f">>>>>>>>>>>Completed {STAGE_NAME}<<<<<<<<<<<<<")
+        logging.info("-----------------------------------------")
+        
+except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+        raise Exception(e, sys)
+
+STAGE_NAME = "Model Trainer Stage"
+
+try: 
+        pipeline = ModelTrainingPipeline()
+        logging.info(f">>>>>>>>>>>Starting {STAGE_NAME}<<<<<<<<<<<<<")
+        pipeline.initiate_model_training()
         logging.info(f">>>>>>>>>>>Completed {STAGE_NAME}<<<<<<<<<<<<<")
         logging.info("-----------------------------------------")
         

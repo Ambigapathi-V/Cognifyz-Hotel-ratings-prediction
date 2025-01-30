@@ -15,4 +15,14 @@ data_preparation:
   Y_train_transformed_df: artifacts/data_preparation/Y_train.csv
   X_test_transformed_df: artifacts/data_preparation/X_test_transformed_df.csv
   Y_test_transformed_df: artifacts/data_preparation/Y_test.csv
+
+model_trainer:
+  root_dir: artifacts/model_trainer
+  preprocessor: artifacts/data_preparation/preprocessor.joblib
+  X_train_transformed_df: artifacts/data_preparation/X_train_transformed_df.csv
+  Y_train_transformed_df: artifacts/data_preparation/Y_train.csv
+  X_test_transformed_df: artifacts/data_preparation/X_test_transformed_df.csv
+  Y_test_transformed_df: artifacts/data_preparation/Y_test.csv
+  model: artifacts/model_trainer/model.h5
+  
  
