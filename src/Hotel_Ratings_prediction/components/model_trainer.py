@@ -1,25 +1,19 @@
 import os
-import sys
-import pandas as pd
 import joblib
-import tensorflow as tf
-import yaml
+import pandas as pd
 import numpy as np
+import logging
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 import seaborn as sns
-import scipy.stats as stats
-from tensorflow import keras
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-from src.Hotel_Ratings_prediction.logging import logging
-from src.Hotel_Ratings_prediction.Exception import Exception
-from src.Hotel_Ratings_prediction.entity.config_entity import ModelTrainerConfig
-from src.Hotel_Ratings_prediction.utils.common import load_df
 
 class ModelTrainer:
-    def __init__(self, config: ModelTrainerConfig):
+    def __init__(self, config):
         self.config = config
         self.X_train_transformed_df = config.X_train_transformed_df
         self.Y_train_transformed_df = config.Y_train_transformed_df
@@ -29,104 +23,132 @@ class ModelTrainer:
 
     def build_model(self):
         try:
-            X_train = load_df(self.X_train_transformed_df)
-            X_test = load_df(self.X_test_transformed_df)
-            Y_train = load_df(self.Y_train_transformed_df).values
-            Y_test = load_df(self.Y_test_transformed_df).values
+            # Load training and testing data
+            X_train = pd.read_csv(self.X_train_transformed_df)
+            X_test = pd.read_csv(self.X_test_transformed_df)
+            Y_train = pd.read_csv(self.Y_train_transformed_df).values
+            Y_test = pd.read_csv(self.Y_test_transformed_df).values
 
-            if len(Y_train.shape) == 1:
-                Y_train = Y_train.reshape(-1, 1)
-            if len(Y_test.shape) == 1:
-                Y_test = Y_test.reshape(-1, 1)
+            logging.info("Starting model training with RandomizedSearchCV.")
 
-            logging.info("Starting model training with TensorFlow.")
+            # Define model choices and their hyperparameters
+            models = {
+                'random_forest': RandomForestRegressor(random_state=42),
+                #'gradient_boosting': GradientBoostingRegressor(random_state=42),
+                #'linear_regression': LinearRegression(),
+                #'decision_tree': DecisionTreeRegressor(random_state=42),
+                #'xgboost': xgb.XGBRegressor(random_state=42)
+            }
 
-            model = Sequential([
-                Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
-                Dropout(0.2),
-                Dense(32, activation='relu'),
-                Dense(1)
-            ])
+            param_grids = {
+                'random_forest': {
+                    'n_estimators': [50, 100, 200],
+                    'max_depth': [10, 20, None],
+                    'min_samples_split': [2, 5, 10],
+                    'min_samples_leaf': [1, 2, 4],
+                    'bootstrap': [True, False]
+                },
+                
+                
+                
+            }
 
-            model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-            history = model.fit(X_train, Y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=1)
-            logging.info("Model trained successfully.")
+            best_model = None
+            best_model_name = None
+            best_params = None
+            best_score = float('inf')  # Start with a high score to find the minimum MSE
 
-            test_loss, test_mae = model.evaluate(X_test, Y_test, verbose=0)
-            logging.info(f"Test Loss: {test_loss}, Test MAE: {test_mae}")
+            # Loop over each model to tune and evaluate
+            for model_name in models:
+                model = models[model_name]
+                param_dist = param_grids[model_name]
 
-            y_pred = model.predict(X_test).ravel()  # Ensure y_pred is 1D
-            mse = mean_squared_error(Y_test, y_pred)
-            mae = mean_absolute_error(Y_test, y_pred)
-            logging.info(f"Test MSE: {mse}, Test MAE: {mae}")
+                logging.info(f"Training {model_name} model.")
 
-            model.save(self.model)
-            logging.info(f"Model saved to {self.model}")
+                # Hyperparameter tuning using RandomizedSearchCV
+                if param_dist:
+                    random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist,
+                                                       n_iter=10, cv=3, verbose=2, random_state=42, n_jobs=-1)
+                    random_search.fit(X_train, Y_train.ravel())  # Fit model using the scaled data
+                    best_model_candidate = random_search.best_estimator_
+                    best_params_candidate = random_search.best_params_
+                    logging.info(f"Best parameters for {model_name}: {best_params_candidate}")
+                else:
+                    model.fit(X_train, Y_train.ravel())  # For LinearRegression, no hyperparameter tuning
+                    best_model_candidate = model
+                    best_params_candidate = None
 
-            # Ensure the directory exists before saving plots
-            plot_dir = 'artifacts/model_trainer/plots'
-            os.makedirs(plot_dir, exist_ok=True)
+                # Model Evaluation
+                Y_pred = best_model_candidate.predict(X_test)
 
-            # Plot training history
-            fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-            axes[0].plot(history.history['loss'], label='Training Loss')
-            axes[0].plot(history.history['val_loss'], label='Validation Loss')
-            axes[0].set_title('Loss Over Epochs')
-            axes[0].set_xlabel('Epochs')
-            axes[0].set_ylabel('Loss (MSE)')
-            axes[0].legend()
+                # Calculate performance metrics
+                mse = mean_squared_error(Y_test, Y_pred)
+                mae = mean_absolute_error(Y_test, Y_pred)
+                r2 = r2_score(Y_test, Y_pred)
 
-            axes[1].plot(history.history['mae'], label='Training MAE')
-            axes[1].plot(history.history['val_mae'], label='Validation MAE')
-            axes[1].set_title('MAE Over Epochs')
-            axes[1].set_xlabel('Epochs')
-            axes[1].set_ylabel('MAE')
-            axes[1].legend()
+                logging.info(f"{model_name} - Test MSE: {mse}, Test MAE: {mae}, Test R2: {r2}")
 
-            plt.tight_layout()
-            plt.savefig(os.path.join(plot_dir, 'training_history.png'))
-            logging.info("Training history plots saved successfully.")
+                # Check if this model is the best one so far
+                if mse < best_score:
+                    best_model = best_model_candidate
+                    best_model_name = model_name
+                    best_params = best_params_candidate
+                    best_score = mse
 
+                 # Ensure the directory exists
+            model_path = os.path.join(self.model, "models")
+            ## Save model in artifacts/model_trainer/models/{model_name}_model.joblib
+            if not os.path.exists(model_path):
+                os.makedirs(model_path,exist_ok=True)
+                best_model_path = os.path.join(model_path, f"{best_model_name}_model.joblib")
+                logging.info(f"{model_name} model saved to {best_model_path}")
+                
+            os.makedirs(model_path, exist_ok=True)  # Creates 'models' directory if not exists
 
-            # Calculate residuals
-            residuals = Y_test.ravel() - y_pred
-            residuals = np.round(residuals, decimals=1)  # Round residuals to 1 decimal place
+            # Save the model
+            model_filename = f"{model_name}_model.joblib"
+            model_file_path = os.path.join(model_path, model_filename)
+            joblib.dump(best_model_candidate, model_file_path)
 
-            residuals_pct = (residuals / Y_test.ravel()) * 100
+            logging.info(f"{model_name} model saved to {model_file_path}")
 
-            # Create results DataFrame
-            results_df = pd.DataFrame({
-                'actual': Y_test.ravel(), 
-                'predicted': y_pred, 
-                'diff': residuals, 
-                'diff_pct': residuals_pct
-            })
-                        # Histograms of Predicted and Actual Values
-            plt.figure(figsize=(10, 6))
-            sns.histplot(results_df['diff'], kde=True)
-            plt.title('Distribution of Residuals')
-            plt.xlabel('Difference between Actual and predicted')
-            plt.ylabel('No of instances')
-            plt.savefig(os.path.join(plot_dir, 'histogram_actual_predicted.png'))
-            logging.info("Histograms of Predicted and Actual Values saved successfully.")
+            # Log best model
+            logging.info(f"Best model: {best_model_name} with MSE: {best_score}")
+            logging.info(f"Best parameters: {best_params}")
 
+            # Final evaluation of best model
+            Y_pred = best_model.predict(X_test)
+            mse = mean_squared_error(Y_test, Y_pred)
+            mae = mean_absolute_error(Y_test, Y_pred)
+            r2 = r2_score(Y_test, Y_pred)
 
-            # QQ Plot of Residuals
-            plt.figure(figsize=(8, 6))
-            stats.probplot(residuals, dist="norm", plot=plt)
-            plt.title("QQ Plot of Residuals")
-            plt.savefig(os.path.join(plot_dir, 'qq_plot_residuals.png'))
-            logging.info("QQ Plot of Residuals saved successfully.")
+            logging.info(f"Final model ({best_model_name}) - Test MSE: {mse}, Test MAE: {mae}, Test R2: {r2}")
 
-            # Residual Distribution Plot
-            plt.figure(figsize=(10, 6))
-            sns.histplot(results_df['diff'], kde=True)
-            plt.title('Distribution of Residuals')
-            plt.xlabel('Difference between Actual and Predicted')
-            plt.ylabel('No of Instances')
-            plt.savefig(os.path.join(plot_dir, 'residual_plots.png'))
-            logging.info("Residual plots saved successfully.")
+            # Plot performance (Residuals and Actual vs Predicted)
+            self.plot_performance(Y_test, Y_pred)
 
         except Exception as e:
             logging.error(f"Error occurred during model training: {e}")
             raise Exception(f"Error during training: {str(e)}")
+
+    def plot_performance(self, Y_test, Y_pred):
+        """Plot performance metrics and residuals"""
+        # Residuals Plot
+        residuals = Y_test.ravel() - Y_pred
+        plt.figure(figsize=(10, 6))
+        sns.histplot(residuals, kde=True)
+        plt.title('Residuals Distribution')
+        plt.xlabel('Residuals')
+        plt.ylabel('Frequency')
+        plt.savefig('artifacts/model_trainer/residuals.png')
+        logging.info("Residuals plot saved successfully.")
+
+        # Actual vs Predicted Plot
+        plt.figure(figsize=(10, 6))
+        plt.scatter(Y_test, Y_pred)
+        plt.plot([Y_test.min(), Y_test.max()], [Y_test.min(), Y_test.max()], 'r--')
+        plt.title('Actual vs Predicted')
+        plt.xlabel('Actual')
+        plt.ylabel('Predicted')
+        plt.savefig('artifacts/model_trainer/actual_vs_predicted.png')
+        logging.info("Actual vs Predicted plot saved successfully.")

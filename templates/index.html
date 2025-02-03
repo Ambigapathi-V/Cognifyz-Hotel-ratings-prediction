@@ -3,105 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Data Visualization</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Restaurant Rating Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Restaurant Data Visualization</h1>
-            <nav>
-                <ul>
-                    <li><a href="#numeric">Numeric Data</a></li>
-                    <li><a href="#categorical">Categorical Data</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>🍽️ Restaurant Rating Predictor</h1>
+            <h3>Predict restaurant ratings based on key features</h3>
+        </header>
 
-    <section id="numeric" class="section">
-        <div class="container">
-            <h2>Numeric Data Overview</h2>
-            <div id="numeric-stats">
-                <!-- Numeric statistics will be injected here -->
+        <form method="POST">
+            <div class="form-container">
+                <!-- Left Column -->
+                <div class="form-column">
+                    <label for="city">🏙️ City</label>
+                    <select id="city" name="city">
+                        <option>New York</option>
+                        <option>London</option>
+                        <option>Delhi</option>
+                        <option>Paris</option>
+                        <option>Tokyo</option>
+                    </select>
+                    
+                    <label for="cuisine1">🍴 Cuisine 1</label>
+                    <select id="cuisine1" name="cuisine1">
+                        <option>French</option>
+                        <option>Italian</option>
+                        <option>Chinese</option>
+                        <option>Indian</option>
+                        <option>Mexican</option>
+                    </select>
+
+                    <label for="price_range">💲 Price Range</label>
+                    <input type="number" id="price_range" name="price_range" min="1" max="5">
+                    
+                    <label for="rating_color">🎨 Rating Color</label>
+                    <select id="rating_color" name="rating_color">
+                        <option>Green</option>
+                        <option>Yellow</option>
+                        <option>Orange</option>
+                        <option>Red</option>
+                        <option>Dark Green</option>
+                    </select>
+
+                    <label for="street_name">🛣️ Street Name</label>
+                    <input type="text" id="street_name" name="street_name">
+                </div>
+
+                <!-- Middle Column -->
+                <div class="form-column">
+                    <label for="cuisine2">🍴 Cuisine 2</label>
+                    <select id="cuisine2" name="cuisine2">
+                        <option>French</option>
+                        <option>Italian</option>
+                        <option>Chinese</option>
+                        <option>Indian</option>
+                        <option>Mexican</option>
+                    </select>
+
+                    <label for="price_level">💰 Price Level</label>
+                    <select id="price_level" name="price_level">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+
+                    <label for="rating_text">📊 Rating Text</label>
+                    <select id="rating_text" name="rating_text">
+                        <option>Excellent</option>
+                        <option>Good</option>
+                        <option>Average</option>
+                        <option>Not Good</option>
+                        <option>Poor</option>
+                    </select>
+
+                    <label for="is_delivering_now">🚚 Is Delivering Now?</label>
+                    <select id="is_delivering_now" name="is_delivering_now">
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+                </div>
+
+                <!-- Right Column -->
+                <div class="form-column">
+                    <label for="average_cost_for_two">💰 Average Cost for Two People</label>
+                    <input type="number" id="average_cost_for_two" name="average_cost_for_two" min="1">
+
+                    <label for="votes">👍 Votes</label>
+                    <input type="number" id="votes" name="votes" min="0">
+                    
+                    <label for="has_online_delivery">📦 Has Online Delivery?</label>
+                    <select id="has_online_delivery" name="has_online_delivery">
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+
+                    <label for="has_table_booking">🍽️ Has Table Booking?</label>
+                    <select id="has_table_booking" name="has_table_booking">
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+
+                    <label for="floor">🏬 Floor</label>
+                    <select id="floor" name="floor">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                    </select>
+
+                    <label for="mall_name">🏢 Mall Name</label>
+                    <input type="text" id="mall_name" name="mall_name">
+                </div>
             </div>
-            <div id="correlation-heatmap">
-                <!-- Correlation heatmap will be displayed here -->
+
+            <div class="form-submit">
+                <button type="submit">🔮 Predict Rating</button>
             </div>
+        </form>
+
+        {% if predicted_rating is not none %}
+        <div id="prediction-result">
+            <h3>Predicted Rating: <span>{{ predicted_rating }}</span></h3>
         </div>
-    </section>
-
-    <section id="categorical" class="section">
-        <div class="container">
-            <h2>Categorical Data Overview</h2>
-            <div id="city-distribution">
-                <!-- Categorical data charts will be injected here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Prediction Form -->
-    <section id="prediction" class="section">
-        <div class="container">
-            <h2>Predict Restaurant Rating</h2>
-            <form method="POST">
-                <label for="restaurant_id">Restaurant ID:</label>
-                <input type="number" id="restaurant_id" name="restaurant_id" required><br><br>
-
-                <label for="country_code">Country Code:</label>
-                <input type="number" id="country_code" name="country_code" required><br><br>
-
-                <label for="longitude">Longitude:</label>
-                <input type="number" step="any" id="longitude" name="longitude" required><br><br>
-
-                <label for="latitude">Latitude:</label>
-                <input type="number" step="any" id="latitude" name="latitude" required><br><br>
-
-                <label for="average_cost_for_two">Average Cost for Two:</label>
-                <input type="number" step="any" id="average_cost_for_two" name="average_cost_for_two" required><br><br>
-
-                <label for="price_range">Price Range:</label>
-                <input type="number" id="price_range" name="price_range" required><br><br>
-
-                <label for="votes">Votes:</label>
-                <input type="number" id="votes" name="votes" required><br><br>
-
-                <label for="floor">Floor:</label>
-                <input type="number" id="floor" name="floor" required><br><br>
-
-                <label for="geo_cluster">Geo Cluster:</label>
-                <input type="number" id="geo_cluster" name="geo_cluster" required><br><br>
-
-                <label for="city_restaurant_density">City Restaurant Density:</label>
-                <input type="number" step="any" id="city_restaurant_density" name="city_restaurant_density" required><br><br>
-
-                <label for="average_city_rating">Average City Rating:</label>
-                <input type="number" step="any" id="average_city_rating" name="average_city_rating" required><br><br>
-
-                <label for="mall_popularity">Mall Popularity:</label>
-                <input type="number" step="any" id="mall_popularity" name="mall_popularity" required><br><br>
-
-                <label for="cuisine_popularity">Cuisine Popularity:</label>
-                <input type="number" step="any" id="cuisine_popularity" name="cuisine_popularity" required><br><br>
-
-                <label for="floor_rank">Floor Rank:</label>
-                <input type="number" id="floor_rank" name="floor_rank" required><br><br>
-
-                <button type="submit">Predict Rating</button>
-            </form>
-
-            {% if prediction is not none %}
-            <h3>Predicted Rating: {{ prediction }}</h3>
-            {% endif %}
-        </div>
-    </section>
+        {% endif %}
+    </div>
 
     <footer>
-        <div class="container">
-            <p>Made with ❤️ by Your Name</p>
-        </div>
+        <p>🔗 Developed by Ambigapathi V | Powered by Machine Learning</p>
     </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

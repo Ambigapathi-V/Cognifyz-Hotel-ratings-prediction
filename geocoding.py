@@ -1,22 +1,25 @@
 import requests
 
-def get_coordinates_from_positionstack(location, api_key):
-    geocode_url = f"http://api.positionstack.com/v1/forward?access_key={api_key}&query={location}"
-    response = requests.get(geocode_url)
+def get_lat_lon_from_mapsco(location, api_key):
+    """Get latitude and longitude from a location using Maps.co API."""
+    url = f"https://geocode.maps.co/search?q={location}&api_key={api_key}"
+    response = requests.get(url)
+    
     if response.status_code == 200:
         result = response.json()
-        if result['data']:
-            latitude = result['data'][0]['latitude']
-            longitude = result['data'][0]['longitude']
+        if result:
+            latitude = result[0]['lat']
+            longitude = result[0]['lon']
             return latitude, longitude
     return None, None
 
-# Replace 'YOUR_API_KEY' with your actual PositionStack API key
-api_key = 'fad6ef4590854a9bde4e010bd94ffeb9'
-location = "salem"
-latitude, longitude = get_coordinates_from_positionstack(location, api_key)
+# Replace with your actual API key
+api_key = "679c8a06120d8228223481dyna5e88b"
+
+location = input("Enter location: ")
+latitude, longitude = get_lat_lon_from_mapsco(location, api_key)
 
 if latitude and longitude:
-    print(f"Latitude: {latitude}, Longitude: {longitude}")
+    print(f"📍 Location: {location}\n🌍 Latitude: {latitude}, Longitude: {longitude}")
 else:
-    print("Location not found.")
+    print("❌ Location not found. Please try again with a valid location.")

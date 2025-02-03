@@ -1,68 +1,112 @@
 import streamlit as st
 import pandas as pd
-import requests
 from joblib import load
-from tensorflow.keras.models import load_model
-from tensorflow.keras.losses import MeanSquaredError
+import logging
+import requests
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Load preprocessor and model
 preprocessor = load('artifacts/data_preparation/preprocessor.joblib')
-model = load_model('artifacts/model_trainer/model.h5', custom_objects={'mse': MeanSquaredError()})
+model = load(r'artifacts/model_trainer/model.joblib/models/random_forest_model.joblib')
 
-# Streamlit UI
-st.title("🍽️ Restaurant Aggregate Rating Prediction")
+# Function to get latitude and longitude from city using Maps.co API
+def get_lat_lon_from_mapsco(location, api_key):
+    """Get latitude and longitude from a location using Maps.co API."""
+    url = f"https://geocode.maps.co/search?q={location}&api_key={api_key}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        result = response.json()
+        if result:
+            latitude = result[0]['lat']
+            longitude = result[0]['lon']
+            return latitude, longitude
+    return None, None
 
-# Country Mapping for user input
-country_mapping = {
-    "India": 1,
-    "United States": 2,
-    "United Kingdom": 3
-}
+# UI Title
+st.markdown("<h1 style='text-align: center;'>🍽️ Restaurant Rating Predictor</h1>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>Predict restaurant ratings based on key features</h3>", unsafe_allow_html=True)
+st.write("---")
 
-# Cuisine options
-cuisine_options = [
-    'French', 'Japanese', 'Chinese', 'Filipino', 'American', 'Korean', 'Cafe',
-    'Italian', 'Fast Food', 'Bakery', 'Brazilian', 'Pizza', 'Arabian', 'Bar Food',
-    'Mexican', 'International', 'Peruvian', 'Seafood', 'Desserts', 'Juices',
-    'Beverages', 'Lebanese', 'Burger', 'Steak', 'Indian', 'Sushi', 'BBQ',
-    'Gourmet Fast Food', 'Coffee and Tea', 'Asian', 'Southern', 'Breakfast',
-    'Sandwich', 'German', 'Vietnamese', 'Thai', 'Modern Australian', 'European',
-    'Latin American', 'Mediterranean', 'Tea', 'Greek', 'Spanish', 'Hawaiian',
-    'Irish', 'New American', 'Caribbean', 'Cajun', 'Pub Food', 'Tapas',
-    'Singaporean', 'Western', 'Finger Food', 'British', 'Cuban', 'Australian',
-    'Turkish', 'Pakistani', 'Continental', 'Goan', 'South Indian', 'African',
-    'North Indian', 'Rajasthani', 'Ice Cream', 'Mughlai', 'Street Food', 'Mithai',
-    'Maharashtrian', 'Biryani', 'Parsi', 'Raw Meats', 'Kashmiri', 'Persian',
-    'Healthy Food', 'Portuguese', 'Burmese', 'Awadhi', 'Bengali', 'Tibetan',
-    'Lucknowi', 'Gujarati', 'Oriya', 'Hyderabadi', 'Bihari', 'Afghani', 'Kerala',
-    'Andhra', 'Malwani', 'Cuisine Varies', 'Assamese', 'North Eastern', 'Nepalese',
-    'Naga', 'Modern Indian', 'Salad', 'Middle Eastern', 'Charcoal Grill',
-    'Asian Fusion', 'Taiwanese', 'Kiwi', 'Malaysian', 'Contemporary', 'Scottish',
-    'Ramen', 'Argentine', 'Grill', 'Kebab', 'Patisserie', 'World Cuisine',
-    'Turkish Pizza', 'Restaurant Cafe', 'None'
+# Layout with 3 columns for proper alignment
+col1, col2, col3 = st.columns(3)
+cities_options = [
+    "New York", "London", "Delhi", "Paris", "Tokyo",
+    "New Delhi", "Noida", "Gurgaon", "Faridabad", "Near",
+    "Karol Bagh", "Shahdara", "Mahipalpur", "Pitampura",
+    "Mayur Vihar Phase 1", "Rajinder Nagar", "Safdarjung",
+    "Kirti Nagar", "Delhi University-GTB Nagar", "Saket",
+    "Laxmi Nagar", "Tilak Nagar", "Connaught Place",
+    "Kamla Nagar", "Malviya Nagar", "Palam", "Kalkaji",
+    "Rajouri Garden", "MG Road", "Tagore Garden"
 ]
 
-# Sidebar Input Fields
-restaurant_name = st.text_input("Restaurant Name")
-country_name = st.selectbox("Country", list(country_mapping.keys()))
-city = st.text_input("City")
-average_cost_for_two = st.number_input("Average Cost for Two people")
-price_range = st.selectbox("Price Range", [1, 2, 3, 4, 5])
-votes = st.number_input("Votes")
+cusine_varities =[
+    "North Indian", "Chinese", "Fast Food", "Bakery", "Cafe", 
+    "South Indian", "American", "Mithai", "Street Food", "Pizza",
+    "Mughlai", "Ice Cream", "Italian", "Desserts", "Continental",
+    "Burger", "Biryani", "Raw Meats", "Beverages", "Healthy Food",
+    "Asian", "Indian", "Mexican", "Japanese", "Seafood", "Breakfast",
+    "European", "Brazilian", "Finger Food", "Tibetan", "Lebanese",
+    "Thai", "BBQ", "Tea", "Bengali", "Kerala", "Mediterranean",
+    "Kashmiri", "International", "Juices", "Steak", "Sushi", "British",
+    "French", "Kebab", "Coffee and Tea", "Hyderabadi", "Bar Food",
+    "Goan", "Pakistani", "Afghani", "Latin American", "Gujarati",
+    "Filipino", "Maharashtrian", "Turkish", "Lucknowi", "Naga",
+    "Greek", "Awadhi", "Southern", "Sandwich", "Arabian", "Hawaiian",
+    "Rajasthani", "Parsi", "Bihari", "Restaurant Cafe", "Contemporary",
+    "North Eastern", "Portuguese", "Nepalese", "German", "Caribbean",
+    "Korean"
+]
+currency_types = [
+    "Indian Rupees(Rs.)", "Dollar($)", "Pounds(£)", "Emirati Diram(AED)",
+    "Brazilian Real(R$)", "Rand(R)", "NewZealand($)", "Turkish Lira(TL)",
+    "Qatari Rial(QR)", "Botswana Pula(P)", "Sri Lankan Rupee(LKR)"
+]
 
-currency = st.selectbox("Currency",['Botswana Pula(P)', 'Brazilian Real(R$)', 'Dollar($)',
-       'Emirati Dirham(AED)', 'Indian Rupees(Rs.)', 'New Zealand($)',
-       'Pounds(£)', 'Qatari Rial(QR)', 'Rand(R)',
-       'Sri Lankan Rupee(LKR)', 'Turkish Lira(TL)'])
-has_table_booking = st.selectbox("Has Table Booking",['Yes', 'No'])
-is_delivering_now = st.selectbox("Is Delivering Now",['Yes', 'No'])
-rating_color = st.selectbox("Rating Color",['Dark Green', 'Green', 'Yellow', 'Orange', 'Red'])
-rating_text = st.selectbox("Rating Text",['Excellent', 'Good', 'Average', 'Not Good', 'Poor'])
-cuisines = st.multiselect("Cuisines", cuisine_options)
 
-# Prepare DataFrame
+
+# Left column
+with col1:
+    city = st.selectbox("🏙️ City", cities_options)
+    cuisine1 = st.selectbox("🍴 Cuisine 1", cusine_varities)
+    cuisine2 = st.selectbox("🍴 Cuisine 2", cusine_varities)
+    price_range = int(st.selectbox("💲 Price Range", [1,2,3,4,5]))
+    rating_color = st.selectbox("🎨 Rating Color", ["Green", "Yellow", "Orange", "Red", "Dark Green"])
+    street_name = st.text_input("🛣️ Street Name")
+
+# Middle column
+with col2:
+    cuisine3 = st.selectbox("🍴 Cuisine 3", cusine_varities)
+    cuisine4 = st.selectbox("🍴 Cuisine 4", cusine_varities)
+    price_level = st.selectbox("💰 Price Level", ["Low", "Medium", "High"])
+    currency = st.selectbox("💵 Currency", currency_types)
+    rating_text = st.selectbox("📊 Rating Text", ["Excellent", "Good", "Average", "Not Good", "Poor"])
+    is_delivering_now = st.selectbox("🚚 Is Delivering Now?", ["Yes", "No"])
+
+# Right column
+with col3:
+    average_cost_for_two = int(st.number_input("💰 Average Cost for Two People", min_value=1))
+    votes = int(st.number_input("👍 Votes", min_value=0))
+    has_online_delivery = st.selectbox("📦 Has Online Delivery?", ["Yes", "No"])
+    has_table_booking = st.selectbox("🍽️ Has Table Booking?", ["Yes", "No"])
+    floor = int(st.selectbox("🏬 Floor", [1, 2, 3, 4, 5]))
+    mall_name = st.text_input("🏢 Mall Name")
+
+
+# Fetch latitude and longitude using the Maps.co API when city is selected
+api_key = "679c8a06120d8228223481dyna5e88b"
+latitude, longitude = get_lat_lon_from_mapsco(city, api_key)
+
+if latitude and longitude:
+    st.write(f"📍 Latitude: {latitude}, Longitude: {longitude}")
+else:
+    st.write("❌ Location not found. Please try again with a valid location.")
+
+# Prepare DataFrame with user inputs and the fetched latitude/longitude
 df = pd.DataFrame({
-    'restaurant_name': [restaurant_name],
     'city': [city],
     'average_cost_for_two': [average_cost_for_two],
     'price_range': [price_range],
@@ -72,66 +116,32 @@ df = pd.DataFrame({
     'is_delivering_now': [is_delivering_now],
     'rating_color': [rating_color],
     'rating_text': [rating_text],
-    'cuisines': [cuisines]
+    'cuisine1': [cuisine1],
+    'cuisine2': [cuisine2],
+    'cuisine3': [cuisine3],
+    'cuisine4': [cuisine4],
+    'mall_name': [mall_name],
+    'street_name': [street_name],
+    'has_online_delivery': [has_online_delivery],
+    'floor': [floor],
+    'price_level': [price_level],
+    'latitude': [latitude],  # Adding latitude
+    'longitude': [longitude]  # Adding longitude
 })
 
-# Categorizing average cost into different price levels
-price_bins = [0, 500, 1000, 2000]  # Price ranges
-price_labels = ['Low', 'Medium', 'High']  # Labels for price categories
-df['price_level'] = pd.cut(df['average_cost_for_two'], bins=price_bins, labels=price_labels, include_lowest=True) 
-
-# Replace NaN values with an empty list (for cuisines column)
-df['cuisines'] = df['cuisines'].fillna('')
-
-# If cuisines column is not a list, convert it to a list
-df['cuisines'] = df['cuisines'].apply(lambda x: x if isinstance(x, list) else [])
-
-# Creating four new columns for the cuisines
-df['cuisine1'] = df['cuisines'].apply(lambda x: x[0] if len(x) > 0 else None)
-df['cuisine2'] = df['cuisines'].apply(lambda x: x[1] if len(x) > 1 else None)
-df['cuisine3'] = df['cuisines'].apply(lambda x: x[2] if len(x) > 2 else None)
-df['cuisine4'] = df['cuisines'].apply(lambda x: x[3] if len(x) > 3 else None)
-
-# Dropping the original 'cuisines' column
-df = df.drop(columns=['cuisines'])
-
-# Counting the number of cuisines for each restaurant
-df['cuisine_count'] = df[['cuisine1', 'cuisine2', 'cuisine3', 'cuisine4']].notna().sum(axis=1)
-
-# Convert selected country to corresponding code
-country_code = country_mapping[country_name]
-
-# Geocoding: Get latitude and longitude using PositionStack API
-def get_coordinates_from_positionstack(location, api_key):
-    geocode_url = f"http://api.positionstack.com/v1/forward?access_key={api_key}&query={location}"
-    response = requests.get(geocode_url)
-    if response.status_code == 200:
-        result = response.json()
-        if result['data']:
-            latitude = result['data'][0]['latitude']
-            longitude = result['data'][0]['longitude']
-            return latitude, longitude
-    return None, None
-
-# Use the PositionStack API to get latitude and longitude
-api_key = 'fad6ef4590854a9bde4e010bd94ffeb9'  # Replace with your actual API key
-location = city  # City entered by user in Streamlit input
-latitude, longitude = get_coordinates_from_positionstack(location, api_key)
-
-# Add latitude and longitude to the DataFrame
-df['latitude'] = latitude
-df['longitude'] = longitude
-
-if latitude and longitude:
-    st.success(f"Latitude: {latitude}, Longitude: {longitude}")
-else:
-    st.warning("Location not found.")
-
-# Prediction and display of results
-df['country_code'] = country_code
+# Preprocess the DataFrame
 input_data_processed = preprocessor.transform(df)
 
-prediction = model.predict(input_data_processed)
-predicted_rating = prediction[0][0]
 
-st.subheader(f"Predicted Restaurant Rating: ⭐ {predicted_rating:.2f}")
+predicted_rating = model.predict(input_data_processed)[0]
+
+# Prediction Button
+st.write(" ")
+if st.button("🔮 Predict Rating"):
+    if predicted_rating is not None:
+        st.success(f"Predicted Restaurant Rating: ⭐{predicted_rating:.2f}")
+    else:
+        st.error("Prediction failed due to input issues.")
+
+# Footer
+st.markdown('<p class="footer">🔗 Developed by Ambigapathi V | Powered by Machine Learning</p>', unsafe_allow_html=True)
