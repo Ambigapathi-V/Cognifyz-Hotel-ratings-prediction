@@ -1,4 +1,4 @@
-![vedio](img\project.jpg)
+![vedio](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/project.jpg)
 
 # Restaurant Ratings prediction(Cognifyz Technologies)
 
@@ -31,7 +31,7 @@ The Cognifyz Technologies Data Science Internship Program is designed to provide
 
 ## Screenshots
 
-![App Screenshot](img\hotel_page-0001.jpg)
+![App Screenshot](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/hotel_page-0001.jpg))
 
 # Installation and Setup
 
@@ -112,7 +112,17 @@ Once the data was acquired, several preprocessing steps were carried out to clea
 
 - **Data Splitting**:  
   - The dataset was split into a **training set** (80%) for model training and a **test set** (20%) for model evaluation. This split was performed using **Stratified K-Folds Cross Validation** to ensure a consistent distribution of ratings across both sets.
+ ### **Visualizations**
+Here are some visualizations from the EDA:
 
+- **Distribution of Ratings**
+- **Correlation Matrix**
+- **Price Range vs Rating**
+
+[Include plots here]
+![](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/Distribution%20of%20Aggregate%20Rating.png)
+![](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/Correlation.png)
+![](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/Average%20Rating%20by%20Price%20Range.png)
 ### **Preprocessing Code**
 
 The preprocessing steps were implemented in the `data_preprocessing.py` script or the corresponding Jupyter notebook (`trails.ipynb`). You can check these files for the detailed code used to process the data.
@@ -153,8 +163,8 @@ The model was trained using **Random Forest Regressor**, yielding the following 
 
 These results indicate that the model performs well, with a high R² score showing it explains 87.8% of the variance in restaurant ratings. The low MSE and MAE suggest accurate predictions. The **Actual vs Predicted** and **Residuals plots** provide further insight into the model's performance.
 
-![model](artifacts\model_trainer\actual_vs_predicted.png)
-![model](artifacts\model_trainer\residuals.png)
+![model](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/artifacts/model_trainer/actual_vs_predicted.png)
+![model](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/artifacts/model_trainer/residuals.png)
 
 
 ## **Future Work**
