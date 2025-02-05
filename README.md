@@ -31,7 +31,7 @@ The Cognifyz Technologies Data Science Internship Program is designed to provide
 
 ## Screenshots
 
-![App Screenshot](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/hotel_page-0001.jpg))
+![App Screenshot](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/hotel_page-0001.jpg)
 
 # Installation and Setup
 
