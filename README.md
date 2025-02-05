@@ -66,15 +66,6 @@ The project uses the following Python libraries:
 pip install -r requirements.txt
 ```
 
-## Data
-
-The very crucial part of any data science project is dataset. Therefore list all the data sources used in the project, including links to the original data, descriptions of the data, and any pre-processing steps that were taken.
-
-I structure this as follows - 
-
-## **Data**
-
-The very crucial part of any data science project is the dataset. In this section, we outline the data sources used in the **Restaurant Ratings Prediction** project, provide descriptions of the data, and explain any pre-processing steps taken to prepare it for analysis.
 
 ### **Source Data**
 
