@@ -52,7 +52,7 @@ In this section, we provide the necessary information about the software and too
   This project was developed using **Python 3.x**. You can check your Python version by running:
   ```bash
   python --version
- ``
+  ```
 
 ## Python packages Used
 
