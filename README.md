@@ -29,7 +29,7 @@ The Cognifyz Technologies Data Science Internship Program is designed to provide
 [App Link](https://hotel-ratings-predictor.streamlit.app/)
 
 
-## Screenshots
+## APP UI
 
 ![App Screenshot](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/img/hotel_page-0001.jpg)
 
@@ -158,7 +158,7 @@ These results indicate that the model performs well, with a high R² score showi
 ![model](https://github.com/Ambigapathi-V/Cognifyz-Hotel-ratings-prediction/blob/main/artifacts/model_trainer/residuals.png)
 
 
-## **Future Work**
+## **Future Enhancements**
 
 There are several potential avenues to extend and improve the project:
 
